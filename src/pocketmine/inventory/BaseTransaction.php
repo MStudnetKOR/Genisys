@@ -108,6 +108,12 @@ class BaseTransaction implements Transaction{
 			//Do not send updates for drop item transactions as there is nothing to update
 			return;
 		}
+		
+		if($this->getInventory() instanceof TemporaryInventory){
+			//Attempting to change anvil slots server-side causes PE to crash.
+			return;
+		}
+		
 		$targets = [];
 		if($this->wasSuccessful){
 			$targets = $this->getInventory()->getViewers();

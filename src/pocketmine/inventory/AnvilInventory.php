@@ -55,6 +55,59 @@ class AnvilInventory extends TemporaryInventory{
 		}
 		return false;
 	}
+	
+	public function onProcessSlotChange(Transaction $transaction){
+		//If ANY slot in the anvil changes, we need to recalculate the anvil contents
+		if($transaction->getSlot() === $this->getResultSlotIndex()){
+			if($transaction->getTargetItem()->getId() === Item::AIR){
+				//result slot changed - an item removed from the anvil
+				//returning true tells the transaction queue to handle this transaction the normal way
+				if($this->getItem(self::SACRIFICE)->getId() !== Item::AIR){
+					//calculate repair item cost
+					$durabilityDifference = $this->getItem(self::RESULT)->getDamage() - $this->getItem(self::TARGET)->getDamage();
+					//Potential for divide by zero here. TODO: fix
+					$materialsUsed = ceil(($durabilityDifference / (int) $this->getItem(self::RESULT)->getMaxDurability()) * 4);
+					
+					if($this->getItem(self::SACRIFICE)->getCount() >= $materialsUsed){
+						//Enough materials to go ahead
+						//TODO: finish
+					}
+					
+				}
+				$this->clear(self::TARGET);
+				
+				return true;
+			}else{
+				//result slot changed some other way
+				//TODO: check count changes
+				$this->setItem(self::RESULT, $transaction->getTargetItem(), false);
+				return false;
+			}
+		}else{
+			if($target->getId() === Item::AIR){
+				//item removed from either the sacrifice slot or the target slot
+				$this->clear(self::RESULT);
+			}else{
+				//slot changed in some other way - maybe a count change?
+			}
+			
+		}
+		
+		
+		if($index === $this->getResultSlotIndex() and $this->getItem($index)->getId() !== Item::AIR and $target->getId() === Item::AIR){
+			//Item was removed from the anvil's result slot, recalculate the other slots
+			if($this->getItem(self::RESULT)->deepEquals($this->getItem(self::TARGET), false, false, true)){
+				//Enchantment added or item repaired
+				//TODO: Check if the material in the sacrifice slot can actually be used to repair specified item
+				
+			}else{
+				
+			}
+			
+			
+		}
+	}
+	
 
 	public function onClose(Player $who){
 		$who->updateExperience();
