@@ -127,7 +127,13 @@ class SimpleTransactionQueue implements TransactionQueue{
 
 			if($change["out"] instanceof Item){
 				if(!$this->player->getServer()->allowInventoryCheats){
-					if($transaction->getInventory()->slotContains($transaction->getSlot(), $change["out"]) and !$this->player->isCreative()){
+					if($transaction->getInventory() instanceof TemporaryInventory and $transaction->getSlot() === $transaction->getInventory()->getResultSlotIndex() and $change["in"] === null){
+						//Item removed from a result slot, such as from an anvil
+						$this->player->getInventory()->addItem($change["out"]);  
+						//This only happens on PE, so it's a safe bet to say this FOR NOW
+						//In the future this will no doubt need changing.
+						
+					}elseif($transaction->getInventory()->slotContains($transaction->getSlot(), $change["out"]) and !$this->player->isCreative()){
 						//Do not add items to the crafting inventory in creative to prevent weird duplication bugs.
 						$this->player->getFloatingInventory()->addItem($change["out"]);
 						
@@ -140,7 +146,11 @@ class SimpleTransactionQueue implements TransactionQueue{
 			}
 			if($change["in"] instanceof Item){
 				if(!$this->player->getServer()->allowInventoryCheats){
-					if($this->player->getFloatingInventory()->contains($change["in"]) and !$this->player->isCreative()){
+					if($transaction->getInventory() instanceof TemporaryInventory and $transaction->getSlot() === $transaction->getInventory()->getResultSlotIndex()){
+						//Ignore changes to result slots in temporary inventories
+						//hmm, this might not cut it...
+						
+					}elseif($this->player->getFloatingInventory()->contains($change["in"]) and !$this->player->isCreative()){
 						$this->player->getFloatingInventory()->removeItem($change["in"]);
 						
 					}elseif(!$this->player->isCreative()){ //Transaction failed, if the player was not creative then transaction is illegal

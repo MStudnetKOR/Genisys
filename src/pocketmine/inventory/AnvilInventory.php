@@ -42,7 +42,10 @@ class AnvilInventory extends TemporaryInventory{
 	public function getHolder(){
 		return $this->holder;
 	}
-
+	
+	public function getResultSlotIndex(){
+		return self::RESULT;
+	}
 	
 	public function onRename(Player $player) : bool{
 		$item = $this->getItem(self::RESULT);
